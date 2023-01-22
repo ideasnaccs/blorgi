@@ -15,9 +15,12 @@ extern BLECharacteristic* mode_CHAR;
 extern BLEDescriptor* mode_DESC;
 extern bool deviceConnected;
 extern char mode[2];
+extern uint8_t mode_i;
 
 void init_ble();
 
 char get_mode();
+
+void set_mode(char mode_);
 
 #endif

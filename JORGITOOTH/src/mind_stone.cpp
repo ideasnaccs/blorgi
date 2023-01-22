@@ -8,8 +8,12 @@ BLECharacteristic* mode_CHAR = new BLECharacteristic(MODE_UUID, BLECharacteristi
 BLEDescriptor* mode_DESC = new BLEDescriptor(BLEUUID((uint16_t)0x2901));
 
 bool deviceConnected = false;
-char mode[2] = "C";
+char mode[2] = "E";
+uint8_t mode_i = 0;
 
+/*
+ *  Server callbacks when device connects/disconnects
+ */
 class CorgiCallbacks: public BLEServerCallbacks {
   void onConnect(BLEServer* server) {
     Serial.println("Connected.");
@@ -22,6 +26,21 @@ class CorgiCallbacks: public BLEServerCallbacks {
   }
 };
 
+/*
+ * Handles writing to "mode" Characteristic
+ */
+class CharacteristicCallBack : public BLECharacteristicCallbacks
+{
+  void onWrite(BLECharacteristic *characteristic_)
+  {
+    mode[0] = characteristic_->getValue()[0];
+  }
+};
+
+/*
+ * Initializes BLE device, server, characteristics, descriptors
+ * Begins server advertising
+ */
 void init_ble() {
     BLEDevice::init(BLUETOOTH_NAME);
     BLEServer *server = BLEDevice::createServer();
@@ -38,6 +57,7 @@ void init_ble() {
     service->addCharacteristic(mode_CHAR);
     mode_DESC->setValue("Mode");
     mode_CHAR->addDescriptor(mode_DESC);
+    mode_CHAR->setCallbacks(new CharacteristicCallBack());
 
     service->start();
 
@@ -50,6 +70,25 @@ void init_ble() {
     mode_CHAR->setValue(mode);
 }
 
+/*
+ * Reads "mode" value (as char)
+ */
 char get_mode() {
     return mode[0];
+}
+
+/*
+ * Modes:
+ * Exercise (E)
+ * Chores/Work (E)
+ * Studying (S)
+ * Care (C)
+ */
+void switch_mode() {
+  static char MODES[] = "EWSC";
+  if (mode_i < 4) mode_i++;
+  else mode_i = 0;
+
+  mode[0] = MODES[mode_i];
+  mode_CHAR->setValue(mode);
 }

@@ -8,8 +8,6 @@
 
 extern hw_timer_t *timer;
 
-extern portMUX_TYPE timer_active_MUX;
-
 extern portMUX_TYPE time_left_MUX;
 
 extern volatile bool timer_active;
@@ -26,6 +24,6 @@ void time_decr();
 
 void time_incr();
 
-void start_timer();
+void toggle_timer();
 
 #endif
